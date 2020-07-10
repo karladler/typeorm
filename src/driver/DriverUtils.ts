@@ -61,35 +61,30 @@ export class DriverUtils {
 
     /**
      * Extracts connection data from the connection url.
+     *  expected format is: 
+     *  postgres://{user}:{password}@{hostname}:{port}/{database-name}
      */
     private static parseConnectionUrl(url: string) {
-        const type = url.split(":")[0];
-        const firstSlashes = url.indexOf("//");
-        const preBase = url.substr(firstSlashes + 2);
-        const secondSlash = preBase.indexOf("/");
-        const base = (secondSlash !== -1) ? preBase.substr(0, secondSlash) : preBase;
-        const afterBase = (secondSlash !== -1) ? preBase.substr(secondSlash + 1) : undefined;
+        try {
+          const firstSlashes = url.indexOf("//");
+          const preBase = url.substr(firstSlashes + 2);
+          const lastSlash = preBase.lastIndexOf("/");
+          const base = (lastSlash !== -1) ? preBase.substr(0, lastSlash) : preBase;
+          console.log('base', base)
+          const afterBase = (lastSlash !== -1) ? preBase.substr(lastSlash + 1) : undefined;
+          const [usernameAndPassword, hostAndPort] = base.split("@");
+          const [username, password] = usernameAndPassword.split(":");
+          const [host, port] = hostAndPort.split(":");
 
-        const lastAtSign = base.lastIndexOf("@");
-        const usernameAndPassword = base.substr(0, lastAtSign);
-        const hostAndPort = base.substr(lastAtSign + 1);
-
-        let username = usernameAndPassword;
-        let password = "";
-        const firstColon = usernameAndPassword.indexOf(":");
-        if (firstColon !== -1) {
-            username = usernameAndPassword.substr(0, firstColon);
-            password = usernameAndPassword.substr(firstColon + 1);
+          return {
+              host: host,
+              username: username,
+              password: password,
+              port: port ? parseInt(port) : undefined,
+              database: afterBase || undefined
+          };
+        } catch (e) {
+          throw new Error('malformed connection string')
         }
-        const [host, port] = hostAndPort.split(":");
-
-        return {
-            type: type,
-            host: host,
-            username: decodeURIComponent(username),
-            password: decodeURIComponent(password),
-            port: port ? parseInt(port) : undefined,
-            database: afterBase || undefined
-        };
     }
 }
