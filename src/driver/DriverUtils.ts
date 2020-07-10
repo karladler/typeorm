@@ -70,7 +70,6 @@ export class DriverUtils {
           const preBase = url.substr(firstSlashes + 2);
           const lastSlash = preBase.lastIndexOf("/");
           const base = (lastSlash !== -1) ? preBase.substr(0, lastSlash) : preBase;
-          console.log('base', base)
           const afterBase = (lastSlash !== -1) ? preBase.substr(lastSlash + 1) : undefined;
           const [usernameAndPassword, hostAndPort] = base.split("@");
           const [username, password] = usernameAndPassword.split(":");
